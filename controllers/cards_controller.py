@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, abort, request
 from db import db
 from models.card import Card, CardSchema
 
@@ -21,4 +21,8 @@ def get_card(card_id):
 
     stmt = db.select(Card).filter_by(id=card_id)
     card = db.session.scalar(stmt)
+
+    if not card:
+        abort(400, description=f'Card {card_id} does not exist')
+
     return CardSchema().dump(card)
