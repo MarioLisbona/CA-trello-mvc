@@ -57,7 +57,7 @@ def add_card():
     return {'msg': f'Card titled {card.title} successfully added to database'}
 
 
-# ======================View a single cards only as an existing user================================
+# ======================Delete a single cards only as an admin================================
 @cards_bp.route('/<int:card_id>', methods=['DELETE'])
 @jwt_required()
 def remove_card(card_id):
