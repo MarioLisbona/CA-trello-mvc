@@ -6,9 +6,9 @@ from models.user import User, UserSchema
 
 users_bp = Blueprint('users', __name__, url_prefix='/users')
 
-
-
+# ======================View all users only as an existing user================================
 @users_bp.route('/')
+@jwt_required()
 def get_users():
     #query database for all users to display
     stmt = db.select(User).order_by(User.name, User.is_admin)
@@ -20,8 +20,22 @@ def get_users():
     #return the users in the database
     return UserSchema(many=True, exclude=['password']).dump(users)
 
+
+# ======================Delete a single user only as an admin================================
 @users_bp.route('/<int:user_id>', methods=['DELETE'])
+@jwt_required()
 def delete_user(user_id):
+    #get user id from JWT
+    jwt_user_id = get_jwt_identity()
+
+    #user id to find user in database then asses if they are an admin or not
+    stmt = db.select(User).filter_by(id=jwt_user_id)
+    user = db.session.scalar(stmt)
+
+    #user is not an admin, they cannot delete users
+    if not user.is_admin:
+        abort(401, description='You do not have authorisation to delete users')
+
     #search the database for the user
     stmt = db.select(User).filter_by(id=user_id)
     user = db.session.scalar(stmt)
@@ -38,7 +52,7 @@ def delete_user(user_id):
 
 
 
-
+# ======================Sign up a user================================
 @users_bp.route('/signup/', methods=['POST'])
 def signup():
     #create a User object to store the user information from the json request
