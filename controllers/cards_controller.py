@@ -63,7 +63,7 @@ def update_one_card(card_id):
         abort(404, description=f'Card {card_id} does not exist')
 
 
-# ====================================Create a single card===================================
+# ====================================create a single card===================================
 @cards_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_card():

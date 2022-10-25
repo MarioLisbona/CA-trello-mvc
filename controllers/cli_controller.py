@@ -30,6 +30,17 @@ def seed_db():
             name='John Cleese',
             email='someone@spam.com',
             password=bcrypt.generate_password_hash('12345').decode('utf-8')
+        ),
+        User(
+            name='Mario Lisbona',
+            email='mario.lisbona@gmail.com',
+            password=bcrypt.generate_password_hash('muz123').decode('utf-8')
+        ),
+        User(
+            name='Ali Taubner',
+            email='amtaubner@gmail.com',
+            password=bcrypt.generate_password_hash('ali123').decode('utf-8'),
+            is_admin=True
         )
     ]
 
