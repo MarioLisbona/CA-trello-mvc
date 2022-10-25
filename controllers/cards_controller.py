@@ -99,7 +99,7 @@ def delete_one_card(card_id):
         db.session.commit()
         return {'Msg': f'Card {card.title} deleted successfully'}, 200
     else:
-        abort(404, description=f'Card {card_id} does not exist'),
+        abort(404, description=f'Card {card_id} does not exist')
 
     
     

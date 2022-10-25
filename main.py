@@ -11,10 +11,12 @@ import os
 def create_app():
     app = Flask(__name__)
 
+    #error handler resource not found
     @app.errorhandler(404)
     def not_found(err):
         return {'Error': str(err)}, 404
 
+    #error handler unathorised
     @app.errorhandler(401)
     def not_found(err):
         return {'Error': str(err)}, 401
