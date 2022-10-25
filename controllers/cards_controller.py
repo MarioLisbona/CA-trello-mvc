@@ -20,7 +20,7 @@ def get_all_cards():
     return CardSchema(many=True).dump(cards)
 
 
-# ===================================Retrieve a single card===================================
+# ===================================Get a single card===================================
 @cards_bp.route('/<int:card_id>')
 def get_card(card_id):
 
@@ -78,5 +78,21 @@ def create_card():
     # Respond to client
     return CardSchema().dump(card), 201
 
+# ===================================Delete a single card===================================
+@cards_bp.route('/<int:card_id>', methods=['DELETE'])
+def delete_one_card(card_id):
 
+    #create a statement to query the database for the id passed in
+    stmt = db.select(Card).filter_by(id=card_id)
+    card = db.session.scalar(stmt)
+
+    #if card doesnt exists then provide error messasge
+    if card:
+        db.session.delete(card)
+        db.session.commit()
+        return {'Msg': f'Card {card.title} deleted successfully'}, 200
+    else:
+        abort(404, description=f'Card {card_id} does not exist'),
+
+    
     
