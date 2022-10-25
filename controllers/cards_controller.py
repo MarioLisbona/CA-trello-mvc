@@ -1,28 +1,82 @@
 from flask import Blueprint, abort, request
+from datetime import date
 from db import db
 from models.card import Card, CardSchema
 
 cards_bp = Blueprint('cards', __name__, url_prefix='/cards')
 
+
+# ====================================Get all cards===================================
 @cards_bp.route('/')
 # @jwt_required()
-def all_cards():
-    # return 'all cards route'
-    # if not authorize():
-    #     return {'Error': 'You must be an admin'}, 401
+def get_all_cards():
 
-    stmt = db.select(Card).order_by(Card.priority.desc(), Card.title)
+    #create statement to query the database
+    #sort cards by priority, descending and title
+    stmt = db.select(Card).order_by(Card.date.desc())
     cards = db.session.scalars(stmt)
+
+    #return all the cards in the database
     return CardSchema(many=True).dump(cards)
 
 
+# ===================================Retrieve a single card===================================
 @cards_bp.route('/<int:card_id>')
 def get_card(card_id):
 
+    #create a statement to query the database for the id passed in
     stmt = db.select(Card).filter_by(id=card_id)
     card = db.session.scalar(stmt)
 
+    #if card doesnt exists then provide error messasge
     if not card:
-        abort(400, description=f'Card {card_id} does not exist')
+        abort(404, description=f'Card {card_id} does not exist')
 
+    #return card and display
     return CardSchema().dump(card)
+
+# ====================================Update a single card===================================
+@cards_bp.route('/<int:card_id>', methods=['PUT', 'PATCH'])
+def update_one_card(card_id):
+
+    #create a statement to query the database for the id passed in
+    stmt = db.select(Card).filter_by(id=card_id)
+    card = db.session.scalar(stmt)
+
+    #if the card exists update the card with new inputs, or leave if no input entered
+    if card:
+        card.title = request.json.get('title') or card.title
+        card.description = request.json.get('description') or card.description
+        card.status = request.json.get('status') or card.status
+        card.priority = request.json.get('priority') or card.priority
+
+        #commit changes
+        db.session.commit()
+
+        # return updated card or show error message
+        return CardSchema().dump(card)
+    else:
+        abort(404, description=f'Card {card_id} does not exist')
+
+
+# ====================================Create a single card===================================
+@cards_bp.route('/', methods=['POST'])
+def create_card():
+    # Create a new Card model instance from the user_info passed in the JSON post request
+    card = Card(
+        title = request.json['title'],
+        description = request.json['description'],
+        date = date.today(),
+        status = request.json['status'],
+        priority = request.json['priority']
+    )
+
+    # Add and commit card to DB
+    db.session.add(card)
+    db.session.commit()
+
+    # Respond to client
+    return CardSchema().dump(card), 201
+
+
+    
