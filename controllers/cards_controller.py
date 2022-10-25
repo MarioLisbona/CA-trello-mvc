@@ -1,14 +1,16 @@
 from flask import Blueprint, abort, request
 from datetime import date
-from db import db
+from init import db
 from models.card import Card, CardSchema
+from flask_jwt_extended import jwt_required
+from controllers.auth_controller import authorize
 
 cards_bp = Blueprint('cards', __name__, url_prefix='/cards')
 
 
 # ====================================Get all cards===================================
 @cards_bp.route('/')
-# @jwt_required()
+@jwt_required()
 def get_all_cards():
 
     #create statement to query the database
@@ -22,6 +24,7 @@ def get_all_cards():
 
 # ===================================Get a single card===================================
 @cards_bp.route('/<int:card_id>')
+@jwt_required()
 def get_card(card_id):
 
     #create a statement to query the database for the id passed in
@@ -37,6 +40,7 @@ def get_card(card_id):
 
 # ====================================Update a single card===================================
 @cards_bp.route('/<int:card_id>', methods=['PUT', 'PATCH'])
+@jwt_required()
 def update_one_card(card_id):
 
     #create a statement to query the database for the id passed in
@@ -61,6 +65,7 @@ def update_one_card(card_id):
 
 # ====================================Create a single card===================================
 @cards_bp.route('/', methods=['POST'])
+@jwt_required()
 def create_card():
     # Create a new Card model instance from the user_info passed in the JSON post request
     card = Card(
@@ -80,7 +85,9 @@ def create_card():
 
 # ===================================Delete a single card===================================
 @cards_bp.route('/<int:card_id>', methods=['DELETE'])
+@jwt_required()
 def delete_one_card(card_id):
+    authorize()
 
     #create a statement to query the database for the id passed in
     stmt = db.select(Card).filter_by(id=card_id)
