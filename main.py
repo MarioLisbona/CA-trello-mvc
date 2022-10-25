@@ -17,3 +17,4 @@ def create_app():
     app.register_blueprint(cards_bp)
 
     return app
+-
